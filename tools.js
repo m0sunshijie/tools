@@ -35,8 +35,14 @@ var Event = {
 	remove : function(obj,typ,fun){
 		obj.detachEvent?obj.attachEvent('on'+typ,fun):obj.removeEventListener(typ,fun,false);
 	},
+	getType : function(event){
+		return event.type;
+	},
 	getEvent : function(event){
 		return event || window.event
+	},
+	getElement : function(event){
+		return event.target || event.srcElement;
 	},
 	stop : function(event){
 		event.stopPropagation?event.stopPropagation():event.cancelBubble;
