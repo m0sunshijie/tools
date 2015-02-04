@@ -44,11 +44,8 @@ var Event = {
 	getElement : function(event){
 		return event.target || event.srcElement;
 	},
-	preventDefault : function(event){
-		event.preventDefault?event.preventDefault():event.returnValue = false;
-	},
 	stop : function(event){
-		event.stopPropagation?event.stopPropagation():event.cancelBubble = true;
+		event.stopPropagation?event.stopPropagation():event.cancelBubble;
 		//window.event?eve.cancelBubble=true:eve.stopPropagation();
 	}
 }
