@@ -33,7 +33,7 @@ var Event = {
 		obj.attachEvent?obj.attachEvent('on'+typ,fun):obj.addEventListener(typ,fun,false);
 	},
 	remove : function(obj,typ,fun){
-		obj.detachEvent?obj.detachEvent('on'+typ,fun):obj.removeEventListener(typ,fun,false);
+		obj.detachEvent?obj.attachEvent('on'+typ,fun):obj.removeEventListener(typ,fun,false);
 	},
 	getType : function(event){
 		return event.type;
@@ -63,16 +63,6 @@ var Element = {
 	},
 	getStyle : function(obj,attr){
 		var reslut;
-        if (style == 'padding' || style == 'margin') {
-            result = '';
-            for (var key in { top: 0, right: 0, bottom: 0, left: 0}) {
-                result += Element.getStyle(obj, style + '-' + key) + ' ';
-            }
-            result = result.replace(/\s$/, '');
-            //console.log(result)
-            return result;
-        }
-
 
 		function getComStyle(style){
 			if(obj.currentStyle){
@@ -87,7 +77,6 @@ var Element = {
 			reslut = !reslut ? 1 :reslut;
 			return reslut;
 		}
-		
 		reslut = obj.style[attr];
 
 		if(!reslut){
@@ -112,8 +101,4 @@ var Element = {
 		}
 	}
 
-}
-
-var Animation = {
-	
 }
