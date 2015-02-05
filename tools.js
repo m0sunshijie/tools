@@ -27,7 +27,18 @@ function $o(id,tag,classname){
 		return id;
 	}
 }
+/*
+ * String
+ */
+var str = {
+	reverse : function(str){
+		return str.split('').reverse().join('');
+	}
+}
 
+/*
+ * Event
+ */
 var Event = {
 	add : function(obj,typ,fun){
 		obj.attachEvent?obj.attachEvent('on'+typ,fun):obj.addEventListener(typ,fun,false);
@@ -50,6 +61,9 @@ var Event = {
 	}
 }
 
+/*
+ * Element
+ */
 var Element = {
 	hasClass : function (obj,name){
 		return (" "+obj.className+" ").indexOf(" "+name+" ")>-1?true:false;
@@ -114,6 +128,9 @@ var Element = {
 
 }
 
+/*
+ * Animation
+ */
 var Animation = {
 	
 }
