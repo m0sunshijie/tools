@@ -77,10 +77,10 @@ var Element = {
 	},
 	getStyle : function(obj,attr){
 		var reslut;
-        if (style == 'padding' || style == 'margin') {
+        if (attr == 'padding' || attr == 'margin') {
             result = '';
             for (var key in { top: 0, right: 0, bottom: 0, left: 0}) {
-                result += Element.getStyle(obj, style + '-' + key) + ' ';
+                result += Element.getStyle(obj, attr + '-' + key) + ' ';
             }
             result = result.replace(/\s$/, '');
             //console.log(result)
@@ -106,7 +106,9 @@ var Element = {
 		if(!reslut){
 			reslut = getComStyle(attr)
 		}
-
+		if(reslut == 'auto'){
+			reslut = '0';
+		}
 		return reslut;
 	},
 	setStyle : function(obj,attr){
