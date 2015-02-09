@@ -87,7 +87,6 @@ var Element = {
             return result;
         }
 
-
 		function getComStyle(style){
 			if(obj.currentStyle){
 				return obj.currentStyle[style]
@@ -109,6 +108,20 @@ var Element = {
 		}
 
 		return reslut;
+	},
+	setStyle : function(obj,attr){
+		var str = '';
+		for(var key in attr){
+			if(key == 'opacity'){
+				str+=key+":"+attr[key]+';filter:alpha(opacity='+attr[key]*100+');';
+			}else{
+				str+=key+":"+attr[key]+'; ';
+			}		
+			
+		}
+		obj.style.cssText += str;
+		str = '';
+		return
 	},
 	getPosition : function(obj){
 		var x = 0,
@@ -132,5 +145,7 @@ var Element = {
  * Animation
  */
 var Animation = {
-	
+	start : function(){
+		
+	}
 }
