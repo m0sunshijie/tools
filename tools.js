@@ -80,7 +80,7 @@ var Element = {
         if (attr == 'padding' || attr == 'margin') {
             result = '';
             for (var key in { top: 0, right: 0, bottom: 0, left: 0}) {
-                result += Element.getStyle(obj, attr + '-' + key) + ' ';
+                result += Element.getStyle(obj, style + '-' + key) + ' ';
             }
             result = result.replace(/\s$/, '');
             //console.log(result)
@@ -109,6 +109,7 @@ var Element = {
 		if(reslut == 'auto'){
 			reslut = '0';
 		}
+
 		return reslut;
 	},
 	setStyle : function(obj,attr){
@@ -117,10 +118,11 @@ var Element = {
 			if(key == 'opacity'){
 				str+=key+":"+attr[key]+';filter:alpha(opacity='+attr[key]*100+');';
 			}else{
-				str+=key+":"+attr[key]+'; ';
+				str+=key+":"+parseInt(attr[key])+'px; ';
 			}		
 			
 		}
+		//console.log(str)
 		obj.style.cssText += str;
 		str = '';
 		return
@@ -141,60 +143,56 @@ var Element = {
 		}
 	}
 
-}
+};
 
 /*
  * Anima
  */
 (function(){
+
 	var timer = null,
 		data = {};
 
 	function init(obj,opt){
-		var uid = guide();
+		var uid = guid();
 		data[uid] = {
-			id = obj = typeof obj !='string'?obj:document.getElementById(obj);
+			obj : typeof obj !='string'?obj:document.getElementById(obj)
 		}
 		return uid
 	}
 
    function guid() {
         return 'xxxxxxx-xxxx-yxxxxxx'.replace(/[xy]/g, function(v) {
-            var s = Math.random() * 16 | 0,
-                c = v == 'x' ? s : (s & 0x3 | 0x8);
-            return c.toString(16);
+            var s = Math.random() * 16;
+            return s.toString(16);
         })
     }
 
-	function start(){
+	function start(attr,fn){
 		var time = 500;
+		var uid = this.uid;
 		var beginTime = new Date().getTime(),
 			endTime = beginTime + time,
 			from = {};
 		for(var key in attr){
-			from[key] = Element.getStyle(obj,key)
+			from[key] = Element.getStyle(data[uid].obj,key)
 		}
-		//console.log(from)
+		
 
-		clearInterval(obj.timer);
-		obj.timer = setInterval(function(){
+		clearInterval(data[uid].obj.timer);
+		data[uid].obj.timer = setInterval(function(){
 			var str = {};
 			var nowTime = new Date().getTime();
 			var m = (nowTime-beginTime)/time;
 			m = m>1?1:m;
 			for(var key in attr){
-				if(key == 'opacity'){
-					str[key] = parseFloat(from[key]) + parseFloat(attr[key]-from[key])*m;
-					//console.log(from[key] + (attr[key]-from[key])*m)
-				}else{
-					str[key] = parseFloat(from[key]) + (parseFloat(attr[key])-parseFloat(from[key]))*m
-				}			
-
+				str[key] = parseFloat(from[key]) + (parseFloat(attr[key])-parseFloat(from[key]))*m;
 			}
 
-			Element.setStyle(obj,str)
+			//console.log(str)
+			Element.setStyle(data[uid].obj,str)
 			if(m >= 1){
-				clearInterval(obj.timer)
+				clearInterval(data[uid].obj.timer)
 				if(fn){
 					fn()
 				}
@@ -209,7 +207,7 @@ var Element = {
 			start : start,
 			uid : uid
 		}
-	}
+	};
 
-})()
 
+})();
