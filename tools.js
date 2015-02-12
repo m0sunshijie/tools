@@ -156,55 +156,87 @@ var Element = {
 	function init(obj,opt){
 		var uid = guid();
 		data[uid] = {
-			obj : typeof obj !='string'?obj:document.getElementById(obj)
+			obj : typeof obj !='string'?obj:document.getElementById(obj),
+			time : opt.time,
+			styles : {
+				name : [],
+				from : [],
+				to : []
+			}
 		}
 		return uid
 	}
 
-   function guid() {
+    function guid() {
         return 'xxxxxxx-xxxx-yxxxxxx'.replace(/[xy]/g, function(v) {
-            var s = Math.random() * 16;
-            return s.toString(16);
+            var s = Math.random() * 16 | 0,
+                c = v == 'x' ? s : (s & 0x3 | 0x8);
+            return c.toString(16);
         })
     }
 
-	function start(attr,fn){
-		var time = 500;
+	function start(attr){
 		var uid = this.uid;
-		var beginTime = new Date().getTime(),
-			endTime = beginTime + time,
-			from = {};
+		data[uid].beginTime = new Date().getTime();
+		data[uid].endTime = data[uid].beginTime + data[uid].time;
+		data[uid].styles = {
+			name : [],
+			from : [],
+			to : []
+		};
 		for(var key in attr){
-			from[key] = Element.getStyle(data[uid].obj,key)
+			data[uid].styles.name.push(key);
+			data[uid].styles.from.push(Element.getStyle(data[uid].obj,key));
+			data[uid].styles.to.push(attr[key]);
 		}
 		
-
+		//console.log(data)
 		clearInterval(data[uid].obj.timer);
-		data[uid].obj.timer = setInterval(function(){
-			var str = {};
-			var nowTime = new Date().getTime();
-			var m = (nowTime-beginTime)/time;
-			m = m>1?1:m;
-			for(var key in attr){
-				str[key] = parseFloat(from[key]) + (parseFloat(attr[key])-parseFloat(from[key]))*m;
-			}
+		data[uid].obj.timer = setInterval(play,15);
 
-			//console.log(str)
-			Element.setStyle(data[uid].obj,str)
-			if(m >= 1){
-				clearInterval(data[uid].obj.timer)
-				if(fn){
-					fn()
-				}
-			}
+	}
 
-		},15)
+	function play(){
+
+		for(var key in data){
+			move(key)
+		}
+
+
+	}
+
+	function move(key){
+		var uid = key;
+		var str = {};
+		var nowTime = new Date().getTime();
+		var styles = data[uid].styles;
+		data[uid].m = (nowTime-data[uid].beginTime)/data[uid].time;
+		data[uid].m = data[uid].m>1?1:data[uid].m;
+		for(var i =0; i<styles.name.length; i++){
+			str[styles.name[i]] = parseFloat(styles.from[i]) + (parseFloat(styles.to[i])-parseFloat(styles.from[i]))*data[uid].m;
+			console.log(str)
+		}
+
+		Element.setStyle(data[uid].obj,str)
+		if(data[uid].m >= 1){
+			clearInterval(data[uid].obj.timer)
+			if(data[uid].complete){
+				data[uid].complete()
+			}
+		}
+
+	}
+
+	function complete(fn){
+		var uid = this.uid;
+		data[uid].complete = fn;
 	}
 
 	window['Anima'] = function(obj,opt){
 		var uid = init(obj,opt);
 		return {
 			start : start,
+			complete : complete,
 			uid : uid
 		}
 	};
