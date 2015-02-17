@@ -33,7 +33,13 @@ function $o(id,tag,classname){
 var str = {
 	reverse : function(str){
 		return str.split('').reverse().join('');
+	},
+	hump : function(str){
+		return str.replace(/[A-Z]/g,function(v){
+			return '-' + v.toLowerCase();
+		})
 	}
+
 }
 
 /*
@@ -113,18 +119,19 @@ var Element = {
 		return reslut;
 	},
 	setStyle : function(obj,attr){
-		var str = '';
+		var s = '';
 		for(var key in attr){
+			//key = str.hump(key);
 			if(key == 'opacity'){
-				str+=key+":"+attr[key]+';filter:alpha(opacity='+attr[key]*100+');';
+				s+=key+":"+attr[key]+';filter:alpha(opacity='+attr[key]*100+');';
 			}else{
-				str+=key+":"+parseInt(attr[key])+'px; ';
+				s+=str.hump(key)+":"+parseInt(attr[key])+'px; ';
 			}		
 			
 		}
 		//console.log(str)
-		obj.style.cssText += str;
-		str = '';
+		obj.style.cssText += s;
+		s = '';
 		return
 	},
 	getPosition : function(obj){
@@ -151,13 +158,15 @@ var Element = {
 (function(){
 
 	var timer = null,
-		data = {};
+		data = {},
+		cur = 1;
 
 	function init(obj,opt){
 		var uid = guid();
 		data[uid] = {
 			obj : typeof obj !='string'?obj:document.getElementById(obj),
 			time : opt.time,
+			state : false,
 			styles : {
 				name : [],
 				from : [],
@@ -166,6 +175,7 @@ var Element = {
 		}
 		return uid
 	}
+
 
     function guid() {
         return 'xxxxxxx-xxxx-yxxxxxx'.replace(/[xy]/g, function(v) {
@@ -183,25 +193,41 @@ var Element = {
 			name : [],
 			from : [],
 			to : []
-		};
+		}
+		data[uid].state = true;
 		for(var key in attr){
 			data[uid].styles.name.push(key);
 			data[uid].styles.from.push(Element.getStyle(data[uid].obj,key));
 			data[uid].styles.to.push(attr[key]);
 		}
 		
-		//console.log(data)
-		clearInterval(data[uid].obj.timer);
-		data[uid].obj.timer = setInterval(play,15);
+		
+		clearInterval(timer);
+		timer = setInterval(play,15);
 
 	}
 
 	function play(){
+		var seq = 0;
 
 		for(var key in data){
-			move(key)
+			if(data.hasOwnProperty(key)){
+				//console.log(data)
+				if(data[key].state == true){
+					move(key)
+				}else{
+					seq++;
+				}
+			}	
 		}
 
+		render();
+		if(seq == cur){
+			clearInterval(timer);
+			time = null;
+			seq = 0;
+			return;
+		}
 
 	}
 
@@ -211,32 +237,88 @@ var Element = {
 		var nowTime = new Date().getTime();
 		var styles = data[uid].styles;
 		data[uid].m = (nowTime-data[uid].beginTime)/data[uid].time;
+		//console.log(data[uid].endTime)
 		data[uid].m = data[uid].m>1?1:data[uid].m;
 		for(var i =0; i<styles.name.length; i++){
 			str[styles.name[i]] = parseFloat(styles.from[i]) + (parseFloat(styles.to[i])-parseFloat(styles.from[i]))*data[uid].m;
-			console.log(str)
+			//console.log(str)
 		}
-
-		Element.setStyle(data[uid].obj,str)
-		if(data[uid].m >= 1){
-			clearInterval(data[uid].obj.timer)
-			if(data[uid].complete){
-				data[uid].complete()
-			}
-		}
+		data[uid].cssText = str;
+		//console.log(timer)
 
 	}
 
-	function complete(fn){
+	function render(){
+		for(var key in data){
+			//
+			if(data.hasOwnProperty(key)){
+				Element.setStyle(data[key].obj,data[key].cssText);
+				//console.log(data[key].cssText)
+				if(data[key].m == 1){
+					if(data[key].complete){
+						data[key].complete()
+					}
+					complete(key)
+				}
+			}
+		}
+	}
+
+	function pause(){
+		var uid = this.uid;
+		var current  = new Date().getTime();
+		data[uid].fixTime = current - data[uid].beginTime;
+		data[uid].state = false;
+		//console.log(data[uid])
+	}
+
+	function reStart(){
+		var uid = this.uid;
+		var current  = new Date().getTime();
+		data[uid].beginTime = current - data[uid].fixTime
+		data[uid].state = true;
+		//console.log(data[uid])
+		timer = setInterval(play,15);
+	}
+
+	function stop(uid){
+		var uid = uid || this.uid;
+		complete(uid);
+	}
+
+	function complete(key){
+		data[key].m = 0;
+		data[key].complete = null;
+		data[key].styles = {
+			name : [],
+			from : [],
+			to : []
+		}
+		data[key].state = false;
+		timer =null;
+	}
+
+	function setComplete(fn){
 		var uid = this.uid;
 		data[uid].complete = fn;
+	}
+
+	function cancel(fn){
+		var uid = uid || this.uid;
+		if(!data[uid].state) return;
+		stop(uid);
+		fn && fn();
 	}
 
 	window['Anima'] = function(obj,opt){
 		var uid = init(obj,opt);
 		return {
 			start : start,
-			complete : complete,
+			complete : setComplete,
+			pause : pause,
+			stop : stop,
+			reStart : reStart,
+			cancel : cancel,
 			uid : uid
 		}
 	};
