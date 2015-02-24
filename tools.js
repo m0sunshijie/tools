@@ -148,7 +148,24 @@ var Element = {
 			x : x,
 			y : y
 		}
-	}
+	},
+    getChild: function(obj, node) {
+        var o = typeof obj === 'string' ? document.getElementById(obj) : obj,
+            list = o.childNodes,
+            nodes = [];
+        for (var i = 0, l = list.length; i < l; i++) {
+            if (node) {
+                if (list[i].nodeName == node.toUpperCase()) {
+                    nodes.push(list[i]);
+                }
+            } else {
+                if (list[i].nodeType == 1) nodes.push(list[i])
+            }
+        }
+        o = null;
+        list = null;
+        return nodes;
+    }
 
 };
 
