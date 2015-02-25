@@ -199,7 +199,10 @@ var Element = {
 	function play(){
 
 		for(var key in data){
-			move(key)
+			if(data.hasOwnpropertype(key)){
+				move(key)
+			}
+			
 		}
 
 
@@ -227,7 +230,7 @@ var Element = {
 
 	}
 
-	function complete(fn){
+	function setComplete(fn){
 		var uid = this.uid;
 		data[uid].complete = fn;
 	}
@@ -236,7 +239,7 @@ var Element = {
 		var uid = init(obj,opt);
 		return {
 			start : start,
-			complete : complete,
+			complete : setComplete,
 			uid : uid
 		}
 	};
