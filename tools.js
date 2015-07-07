@@ -2,7 +2,7 @@
  * 
  * @authors Sun (447019583@qq.com)
  * @date    2014-07-29 20:08:43
- * @version $Id$
+ * @version v1.0.0
  */
 if (typeof console === 'undefined') {
     console = {
